@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Network Diagnostic Tools</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --background-color: #1a1a2e;
+      --card-background: rgba(255, 255, 255, 0.05);
+      --primary-text-color: #ffffff;
+      --secondary-text-color: #cccccc;
+      --accent-color: #ff4c60;
+      --shadow-color: rgba(0, 0, 0, 0.5);
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+      background-attachment: fixed;
+      font-family: 'Orbitron', sans-serif;
+      color: var(--primary-text-color);
+      margin: 0;
+      padding: 2rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2rem;
+    }
+
+    .content-section {
+      background: var(--card-background);
+      border-radius: 1rem;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      padding: 2rem;
+      width: 100%;
+      max-width: 1000px;
+      box-shadow: 0 8px 32px var(--shadow-color);
+      backdrop-filter: blur(20px);
+      transition: all 0.3s ease-in-out;
+    }
+
+    h1 {
+      font-size: 3rem;
+      font-weight: 700;
+      margin: 0 0 1rem;
+      text-shadow: 0 0 10px var(--accent-color);
+      text-align: center;
+    }
+
+    h2 {
+      font-size: 2rem;
+      color: var(--accent-color);
+      margin: 0 0 1rem;
+      text-transform: uppercase;
+      text-align: center;
+    }
+
+    #live-clock {
+      font-size: 1.25rem;
+      color: var(--accent-color);
+      margin-bottom: 1rem;
+      text-align: center;
+    }
+
+    .info-text {
+      color: var(--secondary-text-color);
+      font-size: 1rem;
+      margin-bottom: 1.5rem;
+      text-align: center;
+    }
+
+    .button-container {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      background-color: transparent;
+      color: var(--accent-color);
+      padding: 0.75rem 1.5rem;
+      border: 2px solid var(--accent-color);
+      border-radius: 0.5rem;
+      font-weight: bold;
+      text-decoration: none;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 10px transparent;
+      cursor: pointer;
+    }
+
+    .btn:hover,
+    .btn.active {
+      background-color: var(--accent-color);
+      color: #fff;
+      box-shadow: 0 4px 10px var(--shadow-color);
+      transform: scale(1.05);
+    }
+
+    .speedtest-container iframe {
+      width: 100%;
+      height: 100vh;
+      border: none;
+      border-radius: 1rem;
+      overflow: hidden;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    .tool-input {
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+      margin-bottom: 1rem;
+    }
+
+    .tool-input input {
+      padding: 0.5rem;
+      border-radius: 0.5rem;
+      border: 1px solid var(--accent-color);
+      background: transparent;
+      color: var(--primary-text-color);
+    }
+
+    .result-box {
+      background: rgba(0,0,0,0.4);
+      border-radius: 0.5rem;
+      padding: 1rem;
+      overflow-x: auto;
+      font-family: monospace;
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+
+    footer {
+      text-align: center;
+      color: var(--secondary-text-color);
+      font-size: 0.9rem;
+      margin-top: 3rem;
+    }
+  </style>
+</head>
+<body>
+  <section class="content-section">
+    <h1>Network Diagnostic Tools</h1>
+    <div id="live-clock">Loading clock...</div>
+    <p class="info-text">Your IP Address is: <span id="ip-address">Loading...</span></p>
+    <div class="button-container">
+      <button class="btn" onclick="showSection('speed-test', this)">Speed Test</button>
+      <button class="btn" onclick="showSection('ping-test', this)">Ping Test</button>
+      <button class="btn" onclick="showSection('dns-lookup', this)">DNS Lookup</button>
+      <button class="btn" onclick="showSection('traceroute', this)">Traceroute</button>
+    </div>
+  </section>
+
+  <section id="speed-test" class="content-section hidden">
+    <h2>Speed Test</h2>
+    <div class="speedtest-container">
+      <iframe src="https://librespeed.org/" scrolling="no"></iframe>
+    </div>
+  </section>
+
+  <section id="ping-test" class="content-section hidden">
+    <h2>Ping Test</h2>
+    <div class="tool-input">
+      <input id="ping-host" type="text" placeholder="example.com" />
+      <button class="btn" onclick="startPing()">Ping</button>
+    </div>
+    <div id="ping-result" class="result-box"></div>
+  </section>
+
+  <section id="dns-lookup" class="content-section hidden">
+    <h2>DNS Lookup</h2>
+    <div class="tool-input">
+      <input id="dns-domain" type="text" placeholder="example.com" />
+      <button class="btn" onclick="lookupDNS()">Lookup</button>
+    </div>
+    <div id="dns-result" class="result-box"></div>
+  </section>
+
+  <section id="traceroute" class="content-section hidden">
+    <h2>Traceroute</h2>
+    <div class="tool-input">
+      <input id="trace-host" type="text" placeholder="example.com" />
+      <button class="btn" onclick="startTrace()">Trace</button>
+    </div>
+    <div id="trace-result" class="result-box"></div>
+  </section>
+
+  <footer>&copy; 2025 Network Tools</footer>
+
+  <script>
+    function updateClock() {
+      const clockElement = document.getElementById('live-clock');
+      const now = new Date();
+      const timeString = now.toLocaleTimeString([], {
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit'
+      });
+      const dateString = now.toLocaleDateString([], {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+      });
+      clockElement.textContent = `${dateString} | ${timeString}`;
+    }
+    updateClock();
+    setInterval(updateClock, 1000);
+
+    fetch('https://api.ipify.org?format=json')
+      .then(res => res.json())
+      .then(data => {
+        document.getElementById('ip-address').textContent = data.ip;
+      })
+      .catch(() => {
+        document.getElementById('ip-address').textContent = 'Unavailable';
+      });
+
+    function showSection(id, btn) {
+      document.querySelectorAll('.content-section').forEach(section => {
+        if (section.id === id) {
+          section.classList.remove('hidden');
+        } else if (section.id) {
+          section.classList.add('hidden');
+        }
+      });
+      document.querySelectorAll('.button-container .btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+    }
+
+    function startPing() {
+      const host = document.getElementById('ping-host').value.trim();
+      const output = document.getElementById('ping-result');
+      if (!host) {
+        output.textContent = 'Please enter a host to ping.';
+        return;
+      }
+      output.textContent = 'Pinging...';
+      const img = new Image();
+      const start = performance.now();
+      img.onload = img.onerror = function() {
+        const latency = performance.now() - start;
+        output.textContent = `Latency to ${host}: ${latency.toFixed(2)} ms`;
+      };
+      img.src = `https://${host}/?ping=${start}`;
+    }
+
+    function lookupDNS() {
+      const domain = document.getElementById('dns-domain').value.trim();
+      const output = document.getElementById('dns-result');
+      if (!domain) {
+        output.textContent = 'Please enter a domain.';
+        return;
+      }
+      output.textContent = 'Looking up...';
+      fetch(`https://dns.google/resolve?name=${domain}&type=A`)
+        .then(res => res.json())
+        .then(data => {
+          if (data.Answer) {
+            output.textContent = data.Answer.map(a => `${a.name} ${a.type} ${a.data}`).join('\n');
+          } else {
+            output.textContent = 'No records found.';
+          }
+        })
+        .catch(err => {
+          output.textContent = 'Lookup failed: ' + err;
+        });
+    }
+
+    function startTrace() {
+      const host = document.getElementById('trace-host').value.trim();
+      const output = document.getElementById('trace-result');
+      if (!host) {
+        output.textContent = 'Please enter a host.';
+        return;
+      }
+      output.textContent = 'Tracing...';
+      fetch(`https://api.hackertarget.com/mtr/?q=${host}`)
+        .then(res => res.text())
+        .then(text => {
+          output.textContent = text;
+        })
+        .catch(err => {
+          output.textContent = 'Trace failed: ' + err;
+        });
+    }
+  </script>
+</body>
+</html>
